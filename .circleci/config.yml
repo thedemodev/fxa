@@ -98,6 +98,7 @@ jobs:
                 export COVERALLS_ENDPOINT=https://coveralls.io
                 export COVERALLS_FLAG_NAME="<< parameters.module >>"
                 export COVERALLS_PARALLEL=true
+                export COVERALLS_SERVICE_JOB_ID=$CIRCLE_WORKFLOW_ID
 
                 # check for lcov file presence:
                 if [ ! -r ./coverage/lcov-updated.info ]; then
@@ -107,9 +108,9 @@ jobs:
                 cd ../..
                 cat ./packages/<< parameters.module >>/coverage/lcov-updated.info | coveralls --verbose
 
-                if << parameters.module >> = "fxa-auth-server"; then
+                if [ '<< parameters.module >>'=='fxa-auth-server' ]; then
                   curl "https://coveralls.io/webhook?repo_token=COVERALLS_REPO_TOKEN" \
-                    -d "payload[build_num]=$CIRCLE_BUILD_NUM&payload[status]=done"
+                    -d "payload[build_num]=$CIRCLE_WORKFLOW_ID&payload[status]=done"
                   exit 0
                 fi
 
