@@ -105,7 +105,6 @@ module.exports = {
         serialize(clientId, record, req.headers['accept-language'])
       );
     }
-
     // Sort the final list first by last_access_time, then by client_name, then by created_time.
     authorizedClients.sort(function(a, b) {
       if (b.last_access_time > a.last_access_time) {

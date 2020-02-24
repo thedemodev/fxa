@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const unbuf = require('buf').unbuf.hex;
-// const buf = require('buf').hex;
+const hex = require('buf').to.hex;
 
 const P = require('../../promise');
 
@@ -11,8 +10,19 @@ const config = require('../../../config');
 const encrypt = require('../encrypt');
 const logger = require('../logging')('db');
 const mysql = require('./mysql');
+const aggregateActiveClients = require('./helpers').aggregateActiveClients;
 const redis = require('../../redis');
 const AccessToken = require('./accessToken');
+
+function getPocketIds(idNameMap) {
+  return Object.entries(idNameMap)
+    .filter(([_, name]) => name.startsWith('pocket'))
+    .map(([id, _]) => id);
+}
+
+const POCKET_IDS = getPocketIds(
+  config.get('oauthServer.clientIdToServiceNames')
+);
 
 class OauthDB {
   constructor() {
@@ -47,8 +57,13 @@ class OauthDB {
       vals.expiresAt,
       vals.ttl
     );
-    // TODO store pocket tokens in mysql and not redis
-    await this.redis.setAccessToken(token);
+    if (POCKET_IDS.includes(hex(vals.clientId))) {
+      // since Pocket access tokens are long lived store them in mysql
+      const db = await this.mysql;
+      await db._generateAccessToken(token);
+    } else {
+      await this.redis.setAccessToken(token);
+    }
     return token;
   }
 
@@ -57,18 +72,16 @@ class OauthDB {
     if (t) {
       return t;
     }
-    // some might only be in mysql
-    // we can remove this code after all mysql tokens have expired
     const db = await this.mysql;
     return db._getAccessToken(id);
   }
 
   async removeAccessToken(id) {
-    await this.redis.removeAccessToken(id);
-    // some might only be in mysql
-    // we can remove this code after all mysql tokens have expired
-    const db = await this.mysql;
-    return db._removeAccessToken(id);
+    const done = await this.redis.removeAccessToken(id);
+    if (!done) {
+      const db = await this.mysql;
+      return db._removeAccessToken(id);
+    }
   }
 
   async getActiveClientsByUid(uid) {
@@ -81,36 +94,19 @@ class OauthDB {
       }
     }
     const db = await this.mysql;
-    const refreshTokens = await db.getRefreshTokensByUid(uid);
-    for (const token of refreshTokens) {
-      const client = await this.getClient(token.clientId);
-      activeClientTokens.push({
-        id: token.clientId,
-        createdAt: token.createdAt,
-        lastUsedAt: token.lastUsedAt,
-        name: client.name,
-        scope: token.scope,
-      });
-    }
-    // some might only be in mysql
-    // we can remove this code after all mysql tokens have expired
-    const olderTokens = await db._getActiveClientsByUid(uid);
-    return activeClientTokens.concat(olderTokens);
+    const otherTokens = await db._getActiveClientsByUid(uid);
+    return aggregateActiveClients(activeClientTokens.concat(otherTokens));
   }
 
   async getAccessTokensByUid(uid) {
     const tokens = await this.redis.getAccessTokens(uid);
-    // some might only be in mysql
-    // we can remove this code after all mysql tokens have expired
     const db = await this.mysql;
-    const olderTokens = await db._getAccessTokensByUid(uid);
-    return tokens.concat(olderTokens);
+    const otherTokens = await db._getAccessTokensByUid(uid);
+    return tokens.concat(otherTokens);
   }
 
   async removePublicAndCanGrantTokens(userId) {
     await this.redis.removeAccessTokensForPublicClients(userId);
-    // some might only be in mysql
-    // we can remove this code after all mysql tokens have expired
     const db = await this.mysql;
     await db._removePublicAndCanGrantTokens(userId);
   }
@@ -118,7 +114,7 @@ class OauthDB {
   async deleteClientAuthorization(clientId, uid) {
     await this.redis.removeAccessTokensForUserAndClient(uid, clientId);
     const db = await this.mysql;
-    await db._deleteClientAuthorization(clientId, uid);
+    return db._deleteClientAuthorization(clientId, uid);
   }
 
   async deleteClientRefreshToken(refreshTokenId, clientId, uid) {
@@ -131,6 +127,7 @@ class OauthDB {
     if (ok) {
       await this.redis.removeAccessTokensForUserAndClient(uid, clientId);
     }
+    return ok;
   }
 
   async removeUser(uid) {
@@ -144,8 +141,8 @@ function clientEquals(configClient, dbClient) {
   var props = Object.keys(configClient);
   for (var i = 0; i < props.length; i++) {
     var prop = props[i];
-    var configProp = unbuf(configClient[prop]);
-    var dbProp = unbuf(dbClient[prop]);
+    var configProp = hex(configClient[prop]);
+    var dbProp = hex(dbClient[prop]);
     if (configProp !== dbProp) {
       logger.debug('clients.differ', {
         prop: prop,
@@ -163,11 +160,11 @@ function convertClientToConfigFormat(client) {
 
   for (var key in client) {
     if (key === 'hashedSecret' || key === 'hashedSecretPrevious') {
-      out[key] = unbuf(client[key]);
+      out[key] = hex(client[key]);
     } else if (key === 'trusted' || key === 'canGrant') {
       out[key] = !!client[key]; // db stores booleans as 0 or 1.
     } else if (typeof client[key] !== 'function') {
-      out[key] = unbuf(client[key]);
+      out[key] = hex(client[key]);
     }
   }
   return out;
@@ -187,7 +184,7 @@ function preClients() {
               '\tclient=%s has `secret` field\n' +
               '\tuse hashedSecret="%s" instead',
             c.id,
-            unbuf(encrypt.hash(c.secret))
+            hex(encrypt.hash(c.secret))
           );
           return P.reject(
             new Error('Do not keep client secrets in the config file.')

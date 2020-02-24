@@ -11,7 +11,6 @@ const mysql = require('mysql');
 const MysqlPatcher = require('mysql-patcher');
 
 const encrypt = require('../../encrypt');
-const helpers = require('../helpers');
 const P = require('../../../promise');
 const ScopeSet = require('../../../../../fxa-shared').oauth.scopes;
 const unique = require('../../unique');
@@ -176,6 +175,9 @@ const QUERY_CLIENT_DELETE =
 const QUERY_CODE_INSERT =
   'INSERT INTO codes (clientId, userId, email, scope, authAt, amr, aal, offline, code, codeChallengeMethod, codeChallenge, keysJwe, profileChangedAt, sessionTokenId) ' +
   'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+const QUERY_ACCESS_TOKEN_INSERT =
+  'INSERT INTO tokens (clientId, userId, email, scope, type, expiresAt, ' +
+  'token, profileChangedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
 const QUERY_REFRESH_TOKEN_INSERT =
   'INSERT INTO refreshTokens (clientId, userId, email, scope, token, profileChangedAt) VALUES ' +
   '(?, ?, ?, ?, ?, ?)';
@@ -465,6 +467,19 @@ MysqlStore.prototype = {
     return this._write(QUERY_CODE_DELETE, [hash]);
   },
 
+  _generateAccessToken: function _generateAccessToken(accessToken) {
+    return this._write(QUERY_ACCESS_TOKEN_INSERT, [
+      accessToken.clientId,
+      accessToken.userId,
+      accessToken.email,
+      accessToken.scope.toString(),
+      accessToken.type,
+      accessToken.expiresAt,
+      accessToken.tokenId,
+      accessToken.profileChangedAt,
+    ]);
+  },
+
   /**
    * Get an access token by token id
    * @param id Token Id
@@ -501,7 +516,7 @@ MysqlStore.prototype = {
       activeClientTokens.forEach(t => {
         t.scope = ScopeSet.fromString(t.scope);
       });
-      return helpers.aggregateActiveClients(activeClientTokens);
+      return activeClientTokens;
     });
   },
 
