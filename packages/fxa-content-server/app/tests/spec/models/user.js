@@ -310,20 +310,6 @@ describe('models/user', function() {
     });
   });
 
-  it('clearSignedInAccount', function() {
-    sinon.spy(notifier, 'triggerRemote');
-    const uid = createUid();
-    return user.setSignedInAccount({ email: EMAIL, uid }).then(function() {
-      user.clearSignedInAccount();
-      assert.isTrue(user.getSignedInAccount().isDefault());
-      assert.equal(user.getAccountByUid(uid).get('uid'), uid);
-      assert.equal(notifier.triggerRemote.callCount, 1);
-      var args = notifier.triggerRemote.args[0];
-      assert.lengthOf(args, 2);
-      assert.equal(args[0], notifier.COMMANDS.SIGNED_OUT);
-    });
-  });
-
   it('removeAllAccounts', function() {
     return user
       .setAccount({ email: EMAIL, uid: 'uid' })
@@ -491,10 +477,10 @@ describe('models/user', function() {
         });
     });
 
-    it('getSignedInAccount does not return previously cached account after clearSignedInAccount', function() {
+    it('getSignedInAccount does not return previously cached account after clearSignedInAccountUid', function() {
       var account = user.initAccount({ email: EMAIL, uid: createUid() });
       return user.setSignedInAccount(account).then(function() {
-        user.clearSignedInAccount();
+        user.clearSignedInAccountUid();
         assert.isFalse(user.getSignedInAccount() === account);
       });
     });
@@ -635,14 +621,14 @@ describe('models/user', function() {
 
       it('signOutAccount behaves correctly', () => {
         sinon.stub(account, 'signOut').callsFake(() => Promise.resolve());
-        sinon.spy(user, 'clearSignedInAccount');
+        sinon.spy(user, 'clearSignedInAccountUid');
 
         return user.signOutAccount(account).then(() => {
           assert.equal(account.signOut.callCount, 1);
           assert.lengthOf(account.signOut.args[0], 0);
 
-          assert.equal(user.clearSignedInAccount.callCount, 1);
-          assert.lengthOf(user.clearSignedInAccount.args[0], 0);
+          assert.equal(user.clearSignedInAccountUid.callCount, 1);
+          assert.lengthOf(user.clearSignedInAccountUid.args[0], 0);
         });
       });
     });
@@ -1191,14 +1177,14 @@ describe('models/user', function() {
 
     describe('no account signed in', () => {
       it('returns false', () => {
-        user.clearSignedInAccount();
+        user.clearSignedInAccountUid();
         assert.isFalse(user.isSignedInAccount(account));
       });
     });
 
     describe('no account signed in, pass in a `default` account', () => {
       it('returns false', () => {
-        user.clearSignedInAccount();
+        user.clearSignedInAccountUid();
         assert.isFalse(user.isSignedInAccount(user.initAccount({})));
       });
     });
@@ -1237,14 +1223,14 @@ describe('models/user', function() {
 
     describe('no account signed in', () => {
       it('returns false', () => {
-        user.clearSignedInAccount();
+        user.clearSignedInAccountUid();
         assert.isFalse(user.isAnotherAccountSignedIn(account));
       });
     });
 
     describe('no account signed in, pass in a `default` account', () => {
       it('returns false', () => {
-        user.clearSignedInAccount();
+        user.clearSignedInAccountUid();
         assert.isFalse(user.isAnotherAccountSignedIn(user.initAccount({})));
       });
     });

@@ -303,7 +303,7 @@ describe('views/settings', function() {
         .stub(user, 'sessionStatus')
         .callsFake(() => Promise.reject(AuthErrors.toError('INVALID_TOKEN')));
       sinon.stub(user, 'getAccountByUid').callsFake(() => account);
-      sinon.spy(user, 'clearSignedInAccount');
+      sinon.spy(user, 'clearSignedInAccountUid');
 
       relier.set('uid', UID);
       sinon.spy(metrics, 'logEvent');
@@ -312,7 +312,7 @@ describe('views/settings', function() {
 
       return view.render().then(function() {
         assert.isTrue(user.getAccountByUid.calledWith(UID));
-        assert.isTrue(user.clearSignedInAccount.calledOnce);
+        assert.isTrue(user.clearSignedInAccountUid.calledOnce);
         assert.isTrue(metrics.logEvent.calledWith('settings.signout.forced'));
       });
     });
@@ -814,10 +814,10 @@ describe('views/settings', function() {
 
       var sandbox = new sinon.sandbox.create(); // eslint-disable-line new-cap
       sandbox.spy(user, 'setSignedInAccountByUid');
-      sandbox.spy(user, 'clearSignedInAccount');
+      sandbox.spy(user, 'clearSignedInAccountUid');
 
       assert.isFalse(user.setSignedInAccountByUid.called);
-      assert.isFalse(user.clearSignedInAccount.called);
+      assert.isFalse(user.clearSignedInAccountUid.called);
       sandbox.restore();
     });
   });
@@ -825,7 +825,7 @@ describe('views/settings', function() {
   describe('cached/uncached', function() {
     beforeEach(function() {
       sinon.spy(user, 'setSignedInAccountByUid');
-      sinon.spy(user, 'clearSignedInAccount');
+      sinon.spy(user, 'clearSignedInAccountUid');
 
       relier.set('uid', 'uid');
     });
@@ -835,7 +835,7 @@ describe('views/settings', function() {
         createSettingsView();
 
         assert.isFalse(user.setSignedInAccountByUid.called);
-        assert.isTrue(user.clearSignedInAccount.called);
+        assert.isTrue(user.clearSignedInAccountUid.called);
       });
     });
 
@@ -845,7 +845,7 @@ describe('views/settings', function() {
           createSettingsView();
 
           assert.isTrue(user.setSignedInAccountByUid.calledWith('uid'));
-          assert.isFalse(user.clearSignedInAccount.called);
+          assert.isFalse(user.clearSignedInAccountUid.called);
         });
       });
     });
@@ -855,7 +855,7 @@ describe('views/settings', function() {
         createSettingsView();
 
         assert.isFalse(user.setSignedInAccountByUid.called);
-        assert.isTrue(user.clearSignedInAccount.called);
+        assert.isTrue(user.clearSignedInAccountUid.called);
       });
     });
   });

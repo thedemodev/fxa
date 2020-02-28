@@ -296,15 +296,6 @@ var User = Backbone.Model.extend({
     return this.initAccount({});
   },
 
-  // Used to clear the current account, but keeps the account details
-  clearSignedInAccount() {
-    var uid = this.getSignedInAccount().get('uid');
-    this.clearSignedInAccountUid();
-    this._notifier.triggerRemote(this._notifier.COMMANDS.SIGNED_OUT, {
-      uid: uid,
-    });
-  },
-
   removeAllAccounts() {
     this.clearSignedInAccountUid();
     this._storage.remove('accounts');
@@ -322,7 +313,7 @@ var User = Backbone.Model.extend({
     var account = this.initAccount(accountData);
 
     if (this.isSignedInAccount(account)) {
-      this.clearSignedInAccount();
+      this.clearSignedInAccountUid();
     }
 
     var accounts = this._accounts();
