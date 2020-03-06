@@ -1,0 +1,33 @@
+.email-block {
+  ul,
+  ul li {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  h3 {
+    margin: 0 0 5px;
+  }
+
+  h4 {
+    margin-bottom: 10px;
+  }
+
+  .email-bounces {
+    border-style: solid;
+    border-image: linear-gradient(to bottom, var(--ff-brand-gradient)) 1 100%;
+    border-right: 0;
+    border-width: 1px;
+    padding-left: 15px;
+  }
+
+  .verify {
+    color: var(--verify-color);
+    font-weight: var(--font-weight-semi-bold);
+  }
+
+  .result {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-regular);
+  }
+}
