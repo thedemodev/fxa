@@ -5,8 +5,7 @@
 'use strict';
 
 const Promise = require('../promise');
-const safeRegex = require('safe-regex');
-const Sandbox = require('sandbox');
+const { SandboxedRegExp } = require('sandboxed-regexp');
 
 const SERVICES = {
   internal: Symbol(),
@@ -117,7 +116,7 @@ module.exports = (log, config, mailer, emailService) => {
 
               if (
                 senderConfig &&
-                (await isLiveConfigMatch(senderConfig, emailAddress))
+                isLiveConfigMatch(senderConfig, emailAddress)
               ) {
                 upsertServicesMap(
                   services,
@@ -169,39 +168,23 @@ module.exports = (log, config, mailer, emailService) => {
   };
 };
 
-async function isLiveConfigMatch(liveConfig, emailAddress) {
-  return new Promise(resolve => {
-    const { percentage, regex } = liveConfig;
+function isLiveConfigMatch(liveConfig, emailAddress) {
+  const { percentage, regex } = liveConfig;
 
-    if (
-      percentage >= 0 &&
-      percentage < 100 &&
-      Math.floor(Math.random() * 100) >= percentage
-    ) {
-      resolve(false);
-      return;
-    }
+  if (
+    percentage >= 0 &&
+    percentage < 100 &&
+    Math.floor(Math.random() * 100) >= percentage
+  ) {
+    return false;
+  }
 
-    if (regex) {
-      if (
-        regex.indexOf('"') !== -1 ||
-        emailAddress.indexOf('"') !== -1 ||
-        !safeRegex(regex)
-      ) {
-        resolve(false);
-        return;
-      }
+  if (regex) {
+    const re = SandboxedRegExp.new(regex);
+    return re.test(emailAddress);
+  }
 
-      // Execute the regex inside a sandbox and kill it if it takes > 100 ms
-      const sandbox = new Sandbox({ timeout: 100 });
-      sandbox.run(`new RegExp("${regex}").test("${emailAddress}")`, output => {
-        resolve(output.result === 'true');
-      });
-      return;
-    }
-
-    resolve(true);
-  });
+  return true;
 }
 
 function upsertServicesMap(services, service, emailAddress, data) {
