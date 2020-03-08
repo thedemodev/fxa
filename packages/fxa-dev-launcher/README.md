@@ -1,20 +1,30 @@
-# fxa-dev-launcher
+# Firefox Accounts Custom Profiles for Firefox
 
-### Firefox Accounts Custom Profiles for Firefox
+> Launch the Firefox browser with a custom profile for various development and testing purposes.
+
+**Refer to the [main README](https://github.com/mozilla/fxa/blob/master/README.md) to learn about getting set up with FxA.**
+
+##### Table of Contents
+
+- [Custom Profiles](#custom-profiles)
+- [Basic Usage Example in OS X](#basic-usage-example-in-os-x)
+
+## Custom Profiles
 
 **Use `npm start` to start Firefox with local server configurations.**
+
 Available options:
 
-- `FXA_ENV=local` or `latest` or `stable` or `stage` or `content` (NOTE: `local` is default).
-- `DISABLE_E10S=true` - add this flag to turn off E10S. (NOTE: `false` by default).
-- `FXA_DESKTOP_CONTEXT` - `context=` value. (NOTE: `fx_desktop_v2` is default).
-- `FIREFOX_BIN=/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin npm start`
-- `FIREFOX_DEBUGGER=true` - open the [Browser Toolbox](https://developer.mozilla.org/en-US/docs/Tools/Browser_Toolbox) on start (NOTE: `false` by default for speed).
-- `FXA_DESKTOP_CONTEXT` - context value for the fxa-content-server: `context=[value]` (NOTE: `fx_desktop_v3` is default).
+| Argument              | Available options                      | Default                                                                 | Description                        |
+| --------------------- | -------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------- |
+| `FXA_ENV`             | `latest`, `stable`, `stage`, `content` | `local`                                                                 | The profile to launch Firefox with |
+| `DISABLE_E10S`        | `true`, `false`                        | `true`                                                                  | Use this flag to turn off E10S     |
+| `FXA_DESKTOP_CONTEXT` |                                        | `fx_desktop_v3`                                                         |                                    |
+| `FIREFOX_BIN`         |                                        | `/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin npm start` | Where to launch Firefox from       |
 
-### Basic Usage Example in OS X
+## Basic Usage Example in OS X
 
-- Download node.js
+- Download Node.js
 - install it by following the steps in the `.pkg` installer.
 - Open Terminal and Run commands:
 - `git clone https://github.com/vladikoff/fxa-dev-launcher.git`

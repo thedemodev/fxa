@@ -1,6 +1,6 @@
-## A demo of Product Relying party
+# Product Relying Party (demo)
 
-## running locally
+## Running locally
 
 1. install [git] and [node]
 1. get a local copy of the repository: `git clone https://github.com/mozilla/fxa`

@@ -1,12 +1,32 @@
 [![pullreminders](https://pullreminders.com/badge.svg)](https://pullreminders.com?ref=badge)
 
-## Firefox Accounts
+# Firefox Accounts
 
-The Firefox Accounts (fxa) monorepo
+> The Firefox Accounts (fxa) monorepo
 
-### Getting Started
+##### Table of Contents
 
-1. **Manually install the system [dependencies](#dependencies) for OS X or Ubuntu.** Note that [WSL](https://docs.microsoft.com/windows/wsl/) is required for development work on Windows.
+- [Getting Started](#getting-started)
+- [Development Notes](#development-notes)
+  - [Managing Servers](#managing-servers)
+  - [Verifying Accounts](#verifying-accounts)
+  - [Firefox Custom Profile](#firefox-custom-profile)
+  - [Functional Tests](#functional-tests)
+  - [Node Debugging](#node-debugging)
+  - [Android Debugging](#android-debugging)
+  - [Firefox for Android](#firefox-for-android)
+  - [Firefox for iOS](#firefox-for-ios)
+  - [Other Tasks](#other-tasks)
+- [Dependencies](#dependencies)
+  - [macOS](#macos)
+  - [Windows](#windows)
+  - [Ubuntu](#ubuntu)
+- [FxA Packages](#fxa-packages--servers)
+- [Contributing](#contributing)
+
+## Getting Started
+
+1. **Before you begin, install the system [dependencies](#UPDATE).**
 
 2. Clone this repository.
 
@@ -18,180 +38,56 @@ The Firefox Accounts (fxa) monorepo
 
    ```sh
    cd fxa
-   npm install
-   npm start
+   npm install # Install NPM dependencies
+   npm start # Start all servers
    ```
 
-Note this starts up all required services, including Redis, MySQL, and Memcached. It is recommended that you don't run these services yourself, or occupy any of the [server ports](https://github.com/mozilla/fxa/blob/master/mysql_servers.json). Doing so may result in errors.
+   Note this starts up all required services, including Redis, MySQL, and Memcached. It is recommended that you don't run these services yourself, or occupy any of the [server ports](https://github.com/mozilla/fxa/blob/master/mysql_servers.json). Doing so may result in errors.
 
 4. Visit [127.0.0.1:3030](http://127.0.0.1:3030/).
 
-Use the [PM2 tool](https://github.com/Unitech/PM2#main-features) to stop and start the servers, and read server logs.
+   Use the [PM2 tool](#UPDATE) to stop and start the servers, and read server logs.
 
-To start all servers:
+#### Example Workflow
 
-- `npm start`
+After installing FxA run `npm start`. Use `./pm2 status` command to check the status of the servers:
 
-The most common commands are:
+![Example PM2 status](http://i.imgur.com/eqL8FiZ.png)
 
-- `npm stop` **- stop all servers.**
+To avoid wasting computer resources while not working on FxA make sure to stop the servers using `npm stop`. Once you are back working on FxA just use the `npm start` command to bring the servers back up.
+
+Use the `./pm2 logs` command to get the logs of all servers. You may also use `./pm2 logs [id]` to just see the logs for that particular server. If you get an `error` status for any of the servers please verify that you installed all required dependencies. Otherwise file an issue on this repository.
+
+## Development Notes
+
+### Managing Servers
+
+We use [PM2](https://github.com/Unitech/PM2#main-features) to manage our servers.
+
+Use the provided NPM scripts to start and stop servers:
+
+- `npm start` will check if there are any port conflicts, then start all PM2 processes.
+- `npm stop` to stop on PM2 processes.
+
+These are a few common PM2 commands:
 
 - `./pm2 status` - display running servers.
-
 - `./pm2 logs` - logs for all servers (note: this must be used to verify accounts).
-
 - `./pm2 logs 1` - display logs for process `1`.
-
 - `./pm2 stop 1` - stop process `1`.
-
 - `./pm2 restart 1` - restart process `1`.
-
 - More commands in the [PM2 Readme](https://github.com/Unitech/PM2#main-features).
 
----
+### Verifying Accounts
 
-### Contributing
+When you signup for an account using the form on `https://127.0.0.1:3030/signup` the "auth-server local mail helper" logs will print out the verification code that you need to copy and paste into your browser to verify your account locally:
 
-See the separate [CONTRIBUTING.md](https://github.com/mozilla/fxa/blob/master/CONTRIBUTING.md) to learn how to contribute.
-
-### Workflow
-
-> This is an example workflow for **fxa**.
-
-After installing **fxa** run `npm start`. Use `./pm2 status` command to check the status of the servers:
-
-![](http://i.imgur.com/eqL8FiZ.png)
-
-To avoid wasting computer resources while not working on FxA make sure to stop the servers using `npm stop`.
-Once you are back working on FxA just use the `npm start` command to bring the servers back up.
-
-#### Verifying email and viewing logs
-
-Use the `./pm2 logs` command to get the logs of all servers. You may also use `./pm2 logs [id]` to just see the logs for that particular server.
-
-When you signup for an account using the form on `127.0.0.1:3030/signup` the "auth-server local mail helper" logs will print out the verification code that you need to copy paste into your browser to verify your account locally:
-
-![](https://i.imgur.com/cdh9Xrl.png)
-
-If you get an `error` status for any of the servers please verify that you installed all required dependencies. Otherwise file an issue on this repository.
-
----
-
----
-
----
-
-### Dependencies
-
-> Required developer dependencies:
-> [Git](http://git-scm.com/book/en/v2/Getting-Started-Installing-Git),
-> [node.js **12+** with npm 6](http://nodejs.org/),
-> [Python 2.6+](https://www.python.org/),
-> [Java 8+](https://www.java.com/en/download/),
-> [Rust nightly+](https://doc.rust-lang.org/1.5.0/book/nightly-rust.html),
-> [libgmp](https://gmplib.org/),
-> [graphicsmagick](http://www.graphicsmagick.org/),
-> [docker](https://docs.docker.com/),
-> [grunt](https://github.com/gruntjs/grunt-cli),
-> [gcloud CLI](https://cloud.google.com/sdk/)
-
-##### OS X (with [Brew](http://brew.sh/)):
-
-[Xcode and OS X Command Line Tools are required](https://developer.apple.com/xcode/), install it and verify that command line tools installed:
-
-```
-xcode-select --install
-```
-
-then:
-
-```
-sudo easy_install pip && sudo pip install virtualenv
-```
-
-[Install Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg) | [Docs](https://docs.docker.com/docker-for-mac/install/)
-
-##### Ubuntu:
-
-```
-sudo apt-get install build-essential git libgmp3-dev graphicsmagick  python-virtualenv python-dev pkg-config libssl-dev curl openjdk-11-jre firefox
-```
-
-Follow the [Docker CE instructions to install Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
-
-Docker commands require sudo, to avoid it, follow steps below:
-
-1. Add the docker group if it doesn't already exist
-
-```
-sudo groupadd docker
-```
-
-2. Add the connected user \$USER to the docker group
-
-```
-sudo gpasswd -a $USER docker
-```
-
-3. Restart the docker daemon
-
-```
-sudo service docker restart
-```
-
-#### Installing Node.js
-
-We currently use Node 12.
-See https://nodejs.org
-
-Alternatively, the [Node Version Manager](https://github.com/nvm-sh/nvm) makes working with different versions of Node easy.
-
-```
-nvm install 12
-nvm alias default 12
-```
-
-#### Installing Java
-
-> Java is used to run Selenium functional tests
-
-##### OS X:
-
-Download from [java.com/en/download/](https://www.java.com/en/download/)
-
-#### Installing Rust
-
-> Rust Nightly is used for the fxa-email-service
-
-##### Ubuntu and OS X
-
-```
-curl https://sh.rustup.rs -sSf | sh
-```
-
-Once the installer begins:
-
-1. Select "2) Customize installation"
-2. Leave "Default host triple" blank, hit "enter"
-3. Type "nightly" for "Default toolchain"
-4. Type "y" for "Modify PATH variable?"
-5. Select "1) Proceed with installation"
-
-#### Installing grunt
-
-```
-npm install -g grunt-cli
-```
-
----
-
----
-
----
+![Example verification log](https://i.imgur.com/cdh9Xrl.png)
 
 ### Firefox Custom Profile
 
 **Use `npm run start-firefox` to start Firefox with local server configurations.**
+
 Available options:
 
 - `FXA_ENV=local` or `latest` or `stable` or `stage` (NOTE: `local` is default).
@@ -200,15 +96,13 @@ Available options:
 - `FIREFOX_BIN=/Applications/FirefoxNightly.app/Contents/MacOS/firefox-bin npm start`
 - `FIREFOX_DEBUGGER=true` - open [Browser Toolbox](https://developer.mozilla.org/en-US/docs/Tools/Browser_Toolbox) on start (NOTE: `false` by default for speed).
 
----
-
 ### Functional Tests
 
 **The following requires [the JDK](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk) and tests the local servers only.**
 
 To run all functional tests:
 
-```
+```sh
 npm test
 ```
 
@@ -216,13 +110,11 @@ Note that as of 2019-07-08, running this command at the project root will fail (
 
 To run a specific test or tests whose name matches part of a search string:
 
-```
+```sh
 node tests/intern.js --suites=all --grep="Test string to search for"
 ```
 
----
-
-### Node debugging
+### Node Debugging
 
 It's possible to debug a running node process using a variety of debuggers (see the [node debugging docs](https://nodejs.org/en/docs/guides/debugging-getting-started/) for details).
 
@@ -282,9 +174,7 @@ For jest, pass the `--runInBand` argument, so it doesn't fork off the test runne
 
 where `filematcher` is a regex that matches against test file paths. If you omit `filematcher`, Jest will run all tests (but you have to hit Enter a second time to trigger the test run).
 
----
-
-### Android debugging
+### Android Debugging
 
 The following technique works with any Android application and can also be used for Firefox for Android (making the [Firefox for Android](#firefox-for-android) section optional).
 
@@ -300,19 +190,6 @@ adb reverse tcp:5000 tcp:5000 # Sync server
 
 Then run `npm start` and get to work!
 
----
-
-### FxA Email Service
-
-> Skip this if you are not working on the [fxa-email-service](packages/fxa-email-service).
-
-The pm2 scripts run the `latest` docker version of the email service by default. If you want to
-start making changes to the email service then do the following:
-
-1. Stop the email-service using `./pm2 stop <email_service_id>`
-1. Build the service: `cd packages/fxa-email-service; cargo build --bin fxa_email_send`
-1. Run the service: `cd packages/fxa-email-service; ./scripts/run_send.sh`
-
 ### Firefox for Android
 
 > Skip this if you are not working on Firefox for Android and FxA.
@@ -325,8 +202,6 @@ You can test sync locally in Firefox for Android using an emulator or a device o
 The script will tell you which IP to use to work with FxA.
 
 Follow the instructions of the script to update values in `about:config`.
-
----
 
 ### Firefox for iOS
 
@@ -342,55 +217,151 @@ FIREFOX_IOS_HOME=<path_to_firefox_ios_project> npm run config-fxios
 
 After the script you need to rebuild _firefox-ios_.
 
----
-
-### Running with MailDev
-
-If you want to inspect emails, you can run fxa with [MailDev](https://www.npmjs.com/package/maildev).
-
-#### Install
-
-```bash
-npm install maildev -g
-```
-
-#### Run
-
-```bash
-npm start
-./pm2 stop 'auth-server local mail helper'
-```
-
-Once services have started, you can start MailDev on port 9999. You might have to start MailDev with sudo permissions.
-
-```bash
-sudo maildev -s 9999
-```
-
-All emails sent can be viewed from [http://localhost:1080](http://localhost:1080).
-
----
-
 ### Other tasks
 
 - [Updating dependencies and `npm-shrinkwrap.json` files](https://mozilla.github.io/application-services/docs/accounts/local-development.html#updating-npm-shrinkwrap).
 
-### Package docs
+## Dependencies
 
-Each package has it's own README.md and `docs/` directory with info specific to that project.
+Follow the dependency installation instructions for your platform below, then ensure the following dependencies are installed:
 
-- 123done [README](./packages/123done/README.md)
-- browserid-verifier [README](./packages/browserid-verifier/README.md)
-- fortress [README](./packages/fortress/README.md)
-- fxa-auth-db-mysql [README](./packages/fxa-auth-db-mysql/README.md) / [docs/](./packages/fxa-auth-db-mysql/docs)
-- fxa-auth-server [README](./packages/fxa-auth-server/README.md) / [docs/](./packages/fxa-auth-server/docs)
-- fxa-content-server [README](./packages/fxa-content-server/README.md) / [docs/](./packages/fxa-content-server/docs)
-- fxa-email-event-proxy [README](./packages/fxa-email-event-proxy/README.md)
-- fxa-email-service [README](./packages/fxa-email-service/README.md) / [docs/](./packages/fxa-email-service/docs)
-- fxa-event-broker [README](./packages/fxa-event-broker/README.md) / [docs/](./packages/fxa-event-broker/docs)
-- fxa-geodb [README](./packages/fxa-geodb/README.md)
-- fxa-js-client [README](./packages/fxa-js-client/README.md)
-- fxa-payments-server [README](./packages/fxa-payments-server/README.md)
-- fxa-profile-server [README](./packages/fxa-profile-server/README.md) / [docs/](./packages/fxa-profile-server/docs)
-- fxa-shared [README](./packages/fxa-shared/README.md)
-- fxa-support-panel [README](./packages/fxa-support-panel/README.md)
+- [PM2](https://github.com/Unitech/PM2#main-features)
+- [Git](http://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [node.js **12+** with npm 6](http://nodejs.org/)
+- [Python 2.6+](https://www.python.org/)
+- [Java 8+](https://www.java.com/en/download/)
+- [Rust nightly+](https://doc.rust-lang.org/1.5.0/book/nightly-rust.html)
+- [libgmp](https://gmplib.org/)
+- [graphicsmagick](http://www.graphicsmagick.org/)
+- [docker](https://docs.docker.com/)
+- [grunt](https://github.com/gruntjs/grunt-cli)
+- [gcloud CLI](https://cloud.google.com/sdk/)
+
+### macOS
+
+1. [Xcode and OS X Command Line Tools](https://developer.apple.com/xcode/) are required, install and verify that command line tools are installed:
+
+   ```sh
+   xcode-select --install
+   ```
+
+2. Install pip and virtualenv:
+
+   ```sh
+   sudo easy_install pip && sudo pip install virtualenv
+   ```
+
+3. [Install Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg) | [Docs](https://docs.docker.com/docker-for-mac/install/)
+
+### Windows
+
+1. Install [Windows Subsystem for Linux](https://docs.microsoft.com/en-ca/windows/wsl/about).
+
+2. [Install Docker for Windows](https://download.docker.com/win/stable/Docker%20Desktop%20Installer.exe) | [Docs](https://docs.docker.com/docker-for-windows/install/)
+
+### Ubuntu
+
+1. Install the following dependencies:
+
+   ```rb
+   sudo apt-get install build-essential git libgmp3-dev graphicsmagick python-virtualenv python-dev pkg-config libssl-dev curl openjdk-11-jre firefox
+   ```
+
+2. Follow the [Docker CE instructions to install Docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
+
+   Docker commands require sudo, to avoid it, follow steps below:
+
+   1. Add the docker group if it doesn't already exist
+
+      ```sh
+      sudo groupadd docker
+      ```
+
+   2. Add the connected user \$USER to the docker group
+
+      ```sh
+      sudo gpasswd -a $USER docker
+      ```
+
+   3. Restart the docker daemon
+
+      ```sh
+      sudo service docker restart
+      ```
+
+#### Installing Node.js
+
+We currently use Node 12.
+See https://nodejs.org
+
+Alternatively, the [Node Version Manager](https://github.com/nvm-sh/nvm) makes working with different versions of Node easy.
+
+```sh
+nvm install 12
+nvm alias default 12
+```
+
+#### Installing Java
+
+> Java is used to run Selenium functional tests
+
+##### OS X:
+
+Download from [java.com/en/download/](https://www.java.com/en/download/)
+
+#### Installing Rust
+
+> Rust Nightly is used for the fxa-email-service
+
+##### Ubuntu and OS X
+
+```sh
+curl https://sh.rustup.rs -sSf | sh
+```
+
+Once the installer begins:
+
+1. Select "2) Customize installation"
+2. Leave "Default host triple" blank, hit "enter"
+3. Type "nightly" for "Default toolchain"
+4. Type "y" for "Modify PATH variable?"
+5. Select "1) Proceed with installation"
+
+#### Installing grunt
+
+```sh
+npm install -g grunt-cli
+```
+
+## FxA Packages & Servers
+
+| Service                   | Description | Port  | Documentation                                                                                  |
+| ------------------------- | ----------- | ----- | ---------------------------------------------------------------------------------------------- |
+| fxa-email-service         |             | 8001  | [README](./packages/fxa-email-service/README.md) / [docs](./packages/fxa-email-service/docs)   |
+| fxa-auth-db-mysql         |             | 8000  | [README](./packages/fxa-auth-db-mysql/README.md) / [docs](./packages/fxa-auth-db-mysql/docs)   |
+| fxa-auth-server           |             | 9000  | [README](./packages/fxa-auth-server/README.md) / [docs](./packages/fxa-auth-server/docs)       |
+| fxa-content-server        |             | 3030  | [README](./packages/fxa-content-server/README.md) / [docs](./packages/fxa-content-server/docs) |
+| fxa-profile-server        |             | 1111  | [README](./packages/fxa-profile-server/README.md) / [docs](./packages/fxa-profile-server/docs) |
+| fortress                  |             | 9292  | [README](./packages/fortress/README.md)                                                        |
+| 123done                   |             | 8080  | [README](./packages/123done/README.md)                                                         |
+| 321done                   |             | 10139 |                                                                                                |
+| browserid-verifier        |             | 5050  | [README](./packages/browserid-verifier/README.md)                                              |
+| fxa-payments-server       |             | 3031  | [README](./packages/fxa-js-client/README.md)                                                   |
+| support admin panel       |             | 7100  | [README](./packages/fxa-support-panel/README.md)                                               |
+| pushbox                   |             | 8002  |                                                                                                |
+| MySQL server              |             | 3306  |                                                                                                |
+| redis                     |             | 6379  |                                                                                                |
+| memcached                 |             | 11211 |                                                                                                |
+| Fake SQS/SNS              |             | 4100  |                                                                                                |
+| google-pubsub-emulator    |             | 8005  |                                                                                                |
+| google-firestore-emulator |             | 8006  |                                                                                                |
+| sync server               |             | 5000  |                                                                                                |
+| fxa-email-event-proxy     |             |       | [README](./packages/fxa-email-event-proxy/README.md)                                           |
+| fxa-event-broker          |             |       | [README](./packages/fxa-event-broker/README.md) / [docs](./packages/fxa-event-broker/docs)     |
+| fxa-geodb                 |             |       | [README](./packages/fxa-geodb/README.md)                                                       |
+| fxa-js-client             |             |       |                                                                                                |
+| fxa-shared                |             |       | [README](./packages/fxa-shared/README.md)                                                      |
+
+## Contributing
+
+See the separate [CONTRIBUTING.md](https://github.com/mozilla/fxa/blob/master/CONTRIBUTING.md) to learn how to contribute.

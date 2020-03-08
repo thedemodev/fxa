@@ -1,28 +1,36 @@
 # Firefox Accounts Customs Server
 
-This project is used by the [Firefox Accounts Auth Server](https://github.com/mozilla/fxa-auth-server) to detect and deter [fraud and abuse](https://wiki.mozilla.org/Identity/Firefox_Accounts/Fraud_and_abuse).
+> This project is used by the [Firefox Accounts Auth Server](https://github.com/mozilla/fxa-auth-server) to detect and deter [fraud and abuse](https://wiki.mozilla.org/Identity/Firefox_Accounts/Fraud_and_abuse).
+
+**Refer to the [main README](https://github.com/mozilla/fxa/blob/master/README.md) to learn about getting set up with FxA.**
+
+##### Table of Contents
+
+- [Development](#development)
+- [Docker Based Development](#docker-based-development)
+- [Code](#code)
 
 ## Development
 
 Clone the git repository and install dependencies:
 
-    git clone git://github.com/mozilla/fxa-customs-server.git
-    cd fxa-customs-server
-    npm install
+```sh
+git clone git://github.com/mozilla/fxa-customs-server.git
+cd fxa-customs-server
+npm install
+```
 
 Install memcached
 
-    You'll need to [install memcached](http://www.memcached.org/downloads),
-    otherwise all requests will be blocked.
-    By default, the customs server tries to connect to memcached
-    using port `11211` on `127.0.0.1`.
-    You can specify a different port and IP address
-    using the `memcache.address` configuration setting
-    or the `MEMCACHE_ADDRESS` environment variable.
+You'll need to [install memcached](http://www.memcached.org/downloads), otherwise all requests will be blocked.
+
+By default, the customs server tries to connect to memcached using port `11211` on `127.0.0.1`. You can specify a different port and IP address using the `memcache.address` configuration setting or the `MEMCACHE_ADDRESS` environment variable.
 
 To start the server, run:
 
-    npm start
+```sh
+npm start
+```
 
 It will listen on http://127.0.0.1:7000 by default.
 
@@ -30,17 +38,21 @@ It will listen on http://127.0.0.1:7000 by default.
 
 To run the customs server via Docker:
 
-    $ docker-compose up mozilla/fxa_customs_server
+```sh
+docker-compose up mozilla/fxa_customs_server
+```
 
 ## Testing
 
 Run tests with:
 
-    npm test
+```sh
+npm test
+```
 
 To run tests via Docker:
 
-```
+```sh
 docker-compose run mozilla/fxa_customs_server npm test
 ```
 
