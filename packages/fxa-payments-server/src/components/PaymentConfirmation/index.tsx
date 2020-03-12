@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Localized } from 'fluent-react';
 import { formatCurrencyInCents } from '../../lib/formats';
 import { Plan, Profile, Customer } from '../../store/types';
@@ -11,6 +11,7 @@ type PaymentConfirmationProps = {
   customer: Customer;
   profile: Profile;
   selectedPlan: Plan;
+  productUrl: string;
   className?: string;
 };
 
@@ -18,6 +19,7 @@ export const PaymentConfirmation = ({
   customer,
   profile,
   selectedPlan,
+  productUrl,
   className = 'default',
 }: PaymentConfirmationProps) => {
   const { amount, interval } = selectedPlan;
@@ -34,10 +36,13 @@ export const PaymentConfirmation = ({
     <section className={`container card payment-confirmation ${className}`}>
       <header>
         <img src={circledCheckbox} alt="circled checkbox" />
-        <Localized id="payment-confirmation-heading" displayName={displayName}>
+        <Localized
+          id="payment-confirmation-heading"
+          $displayName={displayName || email}
+        >
           <h2></h2>
         </Localized>
-        <Localized id="payment-confirmation-subheading" email={email}>
+        <Localized id="payment-confirmation-subheading" $email={email}>
           <p></p>
         </Localized>
       </header>
@@ -49,7 +54,7 @@ export const PaymentConfirmation = ({
         <div className="bottom-row">
           <Localized
             id="payment-confirmation-invoice-number"
-            invoiceNumber={invoiceNumber}
+            $invoiceNumber={invoiceNumber}
           >
             <p></p>
           </Localized>
@@ -62,7 +67,7 @@ export const PaymentConfirmation = ({
           <h3></h3>
         </Localized>
         <div className="bottom-row">
-          <p>{displayName}</p>
+          {displayName ? <p>{displayName}</p> : null}
           <p>{email}</p>
         </div>
       </div>
@@ -74,20 +79,22 @@ export const PaymentConfirmation = ({
         <div className="bottom-row">
           <Localized
             id="payment-confirmation-amount"
-            amount={formatCurrencyInCents(amount)}
-            interval={interval}
+            $amount={formatCurrencyInCents(amount)}
+            $interval={interval}
           >
             <p></p>
           </Localized>
-          <Localized id="payment-confirmation-cc-preview" last4={last4}>
+          <Localized id="payment-confirmation-cc-preview" $last4={last4}>
             <p className={`c-card ${brand.toLowerCase()}`}></p>
           </Localized>
         </div>
       </div>
 
-      <div className="footer">
+      <div className="footer" data-testid="footer">
         <Localized id="payment-confirmation-download-button">
-          <a>click to download</a>
+          <a data-testid="download-link" href={productUrl}>
+            click to download
+          </a>
         </Localized>
       </div>
     </section>

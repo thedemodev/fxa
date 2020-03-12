@@ -10,8 +10,9 @@
   font-size: 15px;
   height: 100%;
   margin: 0 auto;
+  max-width: 600px;
+  min-width: 375px;
   padding: 20px 48px 0;
-  width: 600px;
 
   p {
     margin: unset;
@@ -49,8 +50,13 @@
     flex-direction: column;
     justify-content: center;
     margin-bottom: initial;
+    margin-top: 60px;
     padding-bottom: 48px;
     text-align: center;
+
+    p {
+      color: #6d6d6e;
+    }
   }
 
   .c-card {
@@ -89,7 +95,7 @@
     justify-content: space-between;
 
     p:last-child {
-      color: $grey-40;
+      color: $grey-50;
     }
   }
 

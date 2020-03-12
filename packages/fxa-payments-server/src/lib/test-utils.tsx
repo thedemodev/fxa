@@ -27,6 +27,7 @@ export const wait = (delay: number) =>
 
 export function expectNockScopesDone(scopes: nock.Scope[]) {
   for (const scope of scopes) {
+    if (!scope.isDone()) console.log("SCOPE NOT DONE::::::::", scope);
     expect(scope.isDone()).toBeTruthy();
   }
 }
@@ -201,6 +202,7 @@ export const defaultAppContextValue = (): AppContextType => ({
     flow_id: 'thisisanid',
   },
   matchMedia: jest.fn().mockImplementation(query => false),
+  matchMediaDefault: jest.fn().mockImplementation(query => false),
   navigateToUrl: jest.fn(),
   getScreenInfo: () => new ScreenInfo(window),
   locationReload: jest.fn(),
